@@ -117,19 +117,7 @@ public class Heap {
             }
         }
 
-        Node traversingNode = newNode;
-        while (traversingNode.getParent() != null) {
-            Integer parentVal = traversingNode.getParent().getValue();
-            Integer curVal = traversingNode.getValue();
-
-            if (curVal < parentVal) {
-                traversingNode.setValue(parentVal);
-                traversingNode.getParent().setValue(curVal);
-                traversingNode = traversingNode.getParent();
-            } else {
-                break;
-            }
-        }
+        upwardHeapify(newNode);
     }
 
     private Integer delete() {
@@ -153,47 +141,69 @@ public class Heap {
             }
         }
 
-        Node traversingNode = root;
-        while (traversingNode.hasChild()) {
-            Integer curVal = traversingNode.getValue();
-            if (traversingNode.getLeftChild() != null && traversingNode.getRightChild() != null) {
-                Integer leftVal = traversingNode.getLeftChild().getValue();
-                Integer rightVal = traversingNode.getRightChild().getValue();
-
-                if (leftVal < rightVal && leftVal < curVal) {
-                    traversingNode.setValue(leftVal);
-                    traversingNode.getLeftChild().setValue(curVal);
-                    traversingNode = traversingNode.getLeftChild();
-                } else if (rightVal < curVal) {
-                    traversingNode.setValue(rightVal);
-                    traversingNode.getRightChild().setValue(curVal);
-                    traversingNode = traversingNode.getRightChild();
-                } else {
-                    break;
-                }
-            } else if (traversingNode.getLeftChild() != null) {
-                Integer leftVal = traversingNode.getLeftChild().getValue();
-                if (leftVal < curVal) {
-                    traversingNode.setValue(leftVal);
-                    traversingNode.getLeftChild().setValue(curVal);
-                    traversingNode = traversingNode.getLeftChild();
-                } else {
-                    break;
-                }
-            } else if (traversingNode.getRightChild() != null) {
-                Integer rightVal = traversingNode.getRightChild().getValue();
-                if (rightVal < curVal) {
-                    traversingNode.setValue(rightVal);
-                    traversingNode.getRightChild().setValue(curVal);
-                    traversingNode = traversingNode.getRightChild();
-                } else {
-                    break;
-                }
-            }
-        }
+        downwardHeapify(root);
 
         return result;
     }
 
-    // TODO: Implement heapify
+    private static void swapNodeValue(Node firstNode, Node secondNode) {
+        Integer temporaryValue = firstNode.getValue();
+        firstNode.setValue(secondNode.getValue());
+        secondNode.setValue(temporaryValue);
+    }
+
+    private void upwardHeapify(Node node) {
+        while (node.getParent() != null) {
+            Integer parentValue = node.getParent().getValue();
+            Integer nodeValue = node.getValue();
+
+            if (nodeValue > parentValue) break;
+
+            swapNodeValue(node, node.getParent());
+            node = node.getParent();
+        }
+    }
+
+    private void downwardHeapify(Node node) {
+        while (node.hasChild()) {
+            Node leftChild, rightChild;
+            Integer nodeValue, leftChildValue, rightChildValue;
+            boolean isLeftSmaller, isChildSmaller;
+
+            leftChild = node.getLeftChild();
+            rightChild = node.getRightChild();
+            nodeValue = node.getValue();
+
+            if (leftChild != null && rightChild != null) {
+                leftChildValue = leftChild.getValue();
+                rightChildValue = rightChild.getValue();
+                isLeftSmaller = leftChildValue < rightChildValue;
+                isChildSmaller = isLeftSmaller ? leftChildValue < nodeValue : rightChildValue < nodeValue;
+
+                if (!isChildSmaller) break;
+                if (isLeftSmaller) {
+                    swapNodeValue(node, leftChild);
+                    node = leftChild;
+                };
+                if (!isLeftSmaller) {
+                    swapNodeValue(node, rightChild);
+                    node = rightChild;
+                };
+            } else if (leftChild != null) {
+                leftChildValue = leftChild.getValue();
+                isChildSmaller = leftChildValue < nodeValue;
+
+                if (!isChildSmaller) break;
+                swapNodeValue(node, leftChild);
+                node = leftChild;
+            } else if (rightChild != null) {
+                rightChildValue = rightChild.getValue();
+                isChildSmaller = rightChildValue < nodeValue;
+
+                if (!isChildSmaller) break;
+                swapNodeValue(node, rightChild);
+                node = rightChild;
+            }
+        }
+    }
 }
